@@ -15,16 +15,10 @@
 
 using Value = long long;
 
-int
-main(void)
+auto
+find_error(std::vector<Value>& xmas)
 {
-
-  std::vector<unsigned> xmas;
-  Value                 n;
-  while (std::cin >> n) { xmas.push_back(n); }
-
-  Value answer;
-  auto  answer_pos = xmas.begin();
+  auto  error_pos = xmas.begin();
   for (auto it = xmas.begin() + NUMRANGE; it < xmas.end(); it++)
   {
     Value           n = *it;
@@ -34,34 +28,40 @@ main(void)
         if (*it_i != *it_j) sums.insert(*it_i + *it_j);
     if (!sums.contains(n))
     {
-      std::cerr << "answer found: " << n << std::endl;
-      answer     = n;
-      answer_pos = it;
+      error_pos = it;
       break;
     }
   }
 
-  if (answer_pos == xmas.begin())
+  if (error_pos == xmas.begin())
   {
-    std::cerr << "answer unexpectedly not found" << std::endl;
-    return EXIT_FAILURE;
+    std::cerr << "error unexpectedly not found" << std::endl;
+    exit(EXIT_FAILURE);
   }
+
+  return error_pos;
+}
+
+auto
+find_weakness(std::vector<Value>& xmas, auto error_pos)
+{
+  auto error = *error_pos;
 
   auto lb = xmas.begin();
   auto ub = xmas.begin() + 2;
   while (ub != xmas.end())
   {
-    if (ub == answer_pos)
+    if (ub == error_pos)
     {
-      lb = answer_pos + 1;
-      ub = answer_pos + 1 + 2;
+      lb = error_pos + 1;
+      ub = error_pos + 1 + 2;
       continue;
     }
 
     auto sum = std::accumulate(lb, ub, 0);
 
-    if (sum < answer) { ub++; }
-    else if (sum > answer)
+    if (sum < error) { ub++; }
+    else if (sum > error)
     {
       lb++;
     }
@@ -72,7 +72,21 @@ main(void)
     }
   }
 
-  auto weakness = *std::min_element(lb, ub) + *std::max_element(lb, ub);
+  return *std::min_element(lb, ub) + *std::max_element(lb, ub);
+}
+
+int
+main(void)
+{
+
+  std::vector<Value> xmas;
+  {
+    Value n;
+    while (std::cin >> n) { xmas.push_back(n); }
+  }
+
+  auto error_pos = find_error(xmas);
+  auto weakness  = find_weakness(xmas, error_pos);
 
   std::cout << "xmas weakness: " << weakness << std::endl;
 
