@@ -59,7 +59,7 @@ main(void)
   size_t iter_count = 0;
   while (layout.has_changed())
   {
-    std::cerr << "iterating " << iter_count << '\n';
+    std::cerr << "iterating " << iter_count << '\r';
     layout.iterate();
     iter_count++;
   }
