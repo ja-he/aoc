@@ -13,6 +13,7 @@
 
 using Timestamp = unsigned;
 using ID        = unsigned;
+using Duration  = unsigned;
 
 int
 main(void)
@@ -30,14 +31,14 @@ main(void)
     }
   }
 
-  std::vector<std::pair<unsigned, ID>> wait_times_per_line;
+  std::vector<std::pair<Duration, ID>> wait_times_per_line;
   std::transform(buslines_in_service.begin(),
                  buslines_in_service.end(),
                  std::back_inserter(wait_times_per_line),
                  [earliest_departure](ID line) {
                    Timestamp tmp       = earliest_departure % line;
-                   unsigned  wait_time = line - tmp;
-                   return std::pair<unsigned, ID>{ wait_time, line };
+                   Duration  wait_time = line - tmp;
+                   return std::pair<Duration, ID>{ wait_time, line };
                  });
   auto [wait_time, line] =
     *std::min_element(wait_times_per_line.begin(), wait_times_per_line.end());
