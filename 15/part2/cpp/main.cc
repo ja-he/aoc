@@ -44,11 +44,8 @@ main(void)
       current = 0;
     }
 
-    std::cerr << "i = " << index << "\r" << std::flush;
-
     index++;
   }
-  std::cerr << std::endl;
 
   std::cout << "number at " << WANTED_INDEX << ": " << current
             << std::endl;
