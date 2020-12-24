@@ -12,14 +12,15 @@
 #define WANTED_INDEX 30000000
 
 using Number = unsigned;
-using Step   = unsigned;
+using Step   = uint32_t;
 
 int
 main(void)
 {
   int index = 1;
   Number current;
-  std::unordered_map<Number, Step> numbers;
+  std::vector<Step> numbers(WANTED_INDEX);
+  std::fill(numbers.begin(), numbers.end(), 0);
 
   {
     std::vector<Number> starting_nums;
@@ -35,14 +36,11 @@ main(void)
 
   while (index < WANTED_INDEX)
   {
-    if (numbers.contains(current)) {
-      Step step = numbers.at(current);
-      numbers[current] = index;
-      current = index - step;
-    } else {
-      numbers[current] = index;
-      current = 0;
-    }
+    Step last_occurrence = numbers[current];
+
+    numbers[current] = index;
+
+    current = (last_occurrence) ? index - last_occurrence : 0;
 
     index++;
   }
