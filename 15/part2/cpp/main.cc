@@ -19,7 +19,7 @@ main(void)
 {
   int index = 1;
   Number current;
-  std::map<Number, Step> numbers;
+  std::unordered_map<Number, Step> numbers;
 
   {
     std::vector<Number> starting_nums;
