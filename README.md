@@ -11,10 +11,9 @@ They may also come in different languages.
 
 # Structure
 
-My main solutions will be in C++.
 Each day has its own directory in which each part has its own directory.
-So the solution for part 2 of day 8 would be found in `08/part2/cpp` while the
-input for that day will be in `08/input`.
+So the solution for part 2 of day 8 of 2020 would be found in
+`2020/08/part2/cpp` while the input for that day will be in `2020/08/input`.
 
 Each main solution directory has a `Makefile` in it, specifying the targets
 `a.out`, `clean` and `solve`, where `solve` is the main target but depends on
@@ -22,6 +21,6 @@ Each main solution directory has a `Makefile` in it, specifying the targets
 The `solve` target feeds the input into the executable (on standard input), so
 to run the solution for part 2 of day 8, all you need to do is call
 ```
-make -C 08/part2/cpp
+make -C 2020/08/part2/cpp
 ```
-which will run `./a.out < ../../input` inside `08/part2/cpp`.
+which will run `./a.out < ../../input` inside `2020/08/part2/cpp`.

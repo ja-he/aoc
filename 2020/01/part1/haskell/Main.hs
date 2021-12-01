@@ -1,17 +1,17 @@
 import System.IO (isEOF)
 import Data.List
 
-main = my_read []
+main = myRead []
 
-my_read l = do
+myRead l = do
   done <- isEOF
-  let (a,b) = find_pair l
+  let (a,b) = findPair l
   if done
     then
-      putStrLn $ show (a*b)
+      print (a*b)
     else do
       i <- getLine
-      my_read ((read i :: Integer):l)
+      myRead ((read i :: Integer):l)
 
-find_pair l =
+findPair l =
   head $ filter (\(a,b) -> a+b == 2020) [(a,b) | a <- l, b <- l]
