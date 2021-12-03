@@ -6,3 +6,5 @@ core
 Main
 *.hi
 output
+target
+*.lock
