@@ -15,12 +15,13 @@ Each day has its own directory in which each part has its own directory.
 So the solution for part 2 of day 8 of 2020 would be found in
 `2020/08/part2/cpp` while the input for that day will be in `2020/08/input`.
 
-Each main solution directory has a `Makefile` in it, specifying the targets
-`a.out`, `clean` and `solve`, where `solve` is the main target but depends on
-`a.out`.
-The `solve` target feeds the input into the executable (on standard input), so
-to run the solution for part 2 of day 8, all you need to do is call
+Each main solution directory has a `Makefile` in it, specifying (possibly among
+others) a target `solve` which will execute the solution, e.g. by compiling the
+program and executing with the puzzle input on standard input.
+
+To run the solution for part 2 of day 8, all you need to do is call
 ```
 make -C 2020/08/part2/cpp
 ```
-which will run `./a.out < ../../input` inside `2020/08/part2/cpp`.
+which will probably run something like `./a.out < ../../input` inside
+`2020/08/part2/cpp`.
