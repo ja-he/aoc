@@ -1,4 +1,4 @@
-CXXFLAGS=-O3 -g --std=c++20 -Wall -Wextra -Wpedantic
+CXXFLAGS=-Og -g --std=c++20 -Wall -Wextra -Wpedantic -fsanitize=address -fsanitize=leak
 
 all: solve
 

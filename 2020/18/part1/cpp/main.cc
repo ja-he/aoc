@@ -166,28 +166,30 @@ using Expression = std::variant<BinaryOperation, Value>;
 class BinaryOperation
 {
 public:
-  BinaryOperation(const Expression* lhs, TokenType op, const Expression* rhs)
+  BinaryOperation(const std::shared_ptr<Expression>& lhs,
+                  TokenType                         op,
+                  const std::shared_ptr<Expression>& rhs)
     : lhs(lhs)
     , op(op)
     , rhs(rhs){};
 
-  const Expression* lhs;
-  TokenType         op;
-  const Expression* rhs;
+  const std::shared_ptr<Expression> lhs;
+  TokenType                         op;
+  const std::shared_ptr<Expression> rhs;
 };
 
 [[nodiscard]] Value
-eval(const Expression* e)
+eval(const Expression& e)
 {
-  bool is_bop   = e->index() == 0;
-  bool is_value = e->index() == 1;
+  bool is_bop   = e.index() == 0;
+  bool is_value = e.index() == 1;
   if (is_bop)
   {
-    auto bop = std::get<BinaryOperation>(*e);
+    auto bop = std::get<BinaryOperation>(e);
     switch (bop.op)
     {
-      case OPERATOR_ADD: return eval(bop.lhs) + eval(bop.rhs);
-      case OPERATOR_MULTIPLY: return eval(bop.lhs) * eval(bop.rhs);
+      case OPERATOR_ADD: return eval(*bop.lhs) + eval(*bop.rhs);
+      case OPERATOR_MULTIPLY: return eval(*bop.lhs) * eval(*bop.rhs);
       default:
         std::cerr << "error: invalid binary operation '" << to_string(bop.op)
                   << "'" << std::endl;
@@ -196,33 +198,33 @@ eval(const Expression* e)
   }
   else if (is_value)
   {
-    return std::get<Value>(*e);
+    return std::get<Value>(e);
   }
   else
   {
-    std::cerr << "error: variant index is " << e->index() << std::endl;
+    std::cerr << "error: variant index is " << e.index() << std::endl;
     exit(1);
   }
 };
 
 [[nodiscard]] std::string
-to_string(const Expression* e)
+to_string(const Expression& e)
 {
-  bool is_bop   = e->index() == 0;
-  bool is_value = e->index() == 1;
+  bool is_bop   = e.index() == 0;
+  bool is_value = e.index() == 1;
   if (is_bop)
   {
-    auto bop = std::get<BinaryOperation>(*e);
-    return "(" + to_string(bop.lhs) + to_string(bop.op) + to_string(bop.rhs) +
+    auto bop = std::get<BinaryOperation>(e);
+    return "(" + to_string(*bop.lhs) + to_string(bop.op) + to_string(*bop.rhs) +
            ")";
   }
   else if (is_value)
   {
-    return std::to_string(std::get<Value>(*e));
+    return std::to_string(std::get<Value>(e));
   }
   else
   {
-    std::cerr << "error: variant index is " << e->index() << std::endl;
+    std::cerr << "error: variant index is " << e.index() << std::endl;
     exit(1);
   }
 };
@@ -235,10 +237,10 @@ public:
   PrattParser(const TokenizedExpression& tokens)
     : tokens(tokens)
   {
-    final_expression = parseExpression(PREC_LOWEST);
+    this->final_expression = parseExpression(PREC_LOWEST);
   };
 
-  Expression* final_expression;
+  std::shared_ptr<Expression> final_expression;
 
 private:
   void         advance(void) { this->current_token_index++; };
@@ -257,23 +259,24 @@ private:
   size_t                     current_token_index = 0;
 
 private:
-  auto parseExpression(int precedence) -> Expression*;
-  auto parseInfixExpression(Expression* lhs) -> Expression*;
-  auto parseGroupedExpression() -> Expression*;
-  auto parseValue() -> Expression*;
+  auto parseExpression(int precedence) -> const std::shared_ptr<Expression>;
+  auto parseInfixExpression(const std::shared_ptr<Expression>& lhs)
+    -> const std::shared_ptr<Expression>;
+  auto parseGroupedExpression() -> const std::shared_ptr<Expression>;
+  auto parseValue() -> const std::shared_ptr<Expression>;
 };
 
 auto
-PrattParser::parseValue() -> Expression*
+PrattParser::parseValue() -> const std::shared_ptr<Expression>
 {
   /*   std::cerr << "parsing value " << current().to_string() << std::endl; */
   assert(this->current().type == NUMBER);
 
-  return new Expression{ (Value)std::stoul(current().content) };
+  return std::make_shared<Expression>((Value)std::stoul(current().content));
 };
 
 auto
-PrattParser::parseGroupedExpression() -> Expression*
+PrattParser::parseGroupedExpression() -> const std::shared_ptr<Expression>
 {
   /*   std::cerr << "parsing grouped " << current().to_string() << std::endl; */
   advance();
@@ -285,7 +288,8 @@ PrattParser::parseGroupedExpression() -> Expression*
 };
 
 auto
-PrattParser::parseInfixExpression(Expression* lhs) -> Expression*
+PrattParser::parseInfixExpression(const std::shared_ptr<Expression>& lhs)
+  -> const std::shared_ptr<Expression>
 {
   /*   std::cerr << "parsing infix expr " << current().to_string() << std::endl;
    */
@@ -293,16 +297,16 @@ PrattParser::parseInfixExpression(Expression* lhs) -> Expression*
 
   auto current_precedence = get_precedence(current().type);
   advance();
-  Expression* rhs = parseExpression(current_precedence);
+  const std::shared_ptr<Expression> rhs = parseExpression(current_precedence);
 
-  return new Expression(BinaryOperation{ lhs, infix_op, rhs });
+  return std::make_shared<Expression>(BinaryOperation{ lhs, infix_op, rhs });
 };
 
 auto
-PrattParser::parseExpression(int precedence) -> Expression*
+PrattParser::parseExpression(int precedence) -> const std::shared_ptr<Expression>
 {
   /*   std::cerr << "parsing expr " << current().to_string() << std::endl; */
-  Expression* lhs;
+  std::shared_ptr<Expression> lhs;
   switch (current().type)
   {
     case LPAREN: lhs = parseGroupedExpression(); break;
@@ -353,7 +357,7 @@ main(void)
   for (int i = 0; i < input.size(); i++)
   {
     PrattParser p{ tokenized_expressions[i] };
-    sum += eval(p.final_expression);
+    sum += eval(*p.final_expression);
   }
 
   std::cout << sum << std::endl;
