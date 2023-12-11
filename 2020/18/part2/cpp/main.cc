@@ -6,6 +6,7 @@
 #include <numeric>
 
 #include <bitset>
+#include <functional>
 #include <map>
 #include <optional>
 #include <string>
@@ -87,7 +88,7 @@ tokenize(const std::string& expression)
   TokenizedExpression tokens;
   Token               current_token;
   current_token.clear();
-  for (int i = 0; i < expression.length(); i++)
+  for (int i = 0; size_t(i) < expression.length(); i++)
   {
     switch (expression[i])
     {
@@ -144,17 +145,13 @@ tokenize(const std::string& expression)
       default:
       {
         if (current_token.empty())
-          if (std::isdigit(expression[i]))
-            current_token.type = NUMBER;
+          if (std::isdigit(expression[i])) current_token.type = NUMBER;
         assert(current_token.type == NUMBER);
         current_token.content += expression[i];
       }
     }
   }
-  if (!current_token.empty())
-  {
-    tokens.push_back(current_token);
-  }
+  if (!current_token.empty()) { tokens.push_back(current_token); }
   tokens.push_back({ EOL, "" });
   return tokens;
 }
@@ -194,10 +191,7 @@ eval(const Expression* e)
         exit(1);
     }
   }
-  else if (is_value)
-  {
-    return std::get<Value>(*e);
-  }
+  else if (is_value) { return std::get<Value>(*e); }
   else
   {
     std::cerr << "error: variant index is " << e->index() << std::endl;
@@ -216,10 +210,7 @@ to_string(const Expression* e)
     return "(" + to_string(bop.lhs) + to_string(bop.op) + to_string(bop.rhs) +
            ")";
   }
-  else if (is_value)
-  {
-    return std::to_string(std::get<Value>(*e));
-  }
+  else if (is_value) { return std::to_string(std::get<Value>(*e)); }
   else
   {
     std::cerr << "error: variant index is " << e->index() << std::endl;
@@ -280,7 +271,7 @@ PrattParser::parseGroupedExpression() -> Expression*
 
   auto e = parseExpression(PREC_LOWEST);
   advance();
-  assert(current().type == RPAREN || [this]() { return false; }());
+  assert(current().type == RPAREN || []() { return false; }());
   return e;
 };
 
@@ -350,7 +341,7 @@ main(void)
 
   // debug print tokens
   uint64_t sum = 0;
-  for (int i = 0; i < input.size(); i++)
+  for (int i = 0; size_t(i) < input.size(); i++)
   {
     PrattParser p{ tokenized_expressions[i] };
     sum += eval(p.final_expression);
